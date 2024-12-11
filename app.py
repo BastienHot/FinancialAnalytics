@@ -142,7 +142,7 @@ def format_price(value: float) -> str:
 # ---------------------
 # UI: Sidebar
 # ---------------------
-st.sidebar.image("logo.png", use_column_width=True)
+st.sidebar.image("logo.png", use_container_width=True)
 st.sidebar.title("Controls")
 category = st.sidebar.radio("Category", ["Currencies", "ETFs", "Rare Materials", "Crypto", "All Assets"])
 period = st.sidebar.selectbox("Period", PERIOD_OPTIONS, index=4)  # Default to "1 Year"
