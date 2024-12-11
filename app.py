@@ -142,7 +142,7 @@ def format_price(value: float) -> str:
 # ---------------------
 # UI: Sidebar
 # ---------------------
-st.sidebar.image("./logo.png", use_container_width=True)  # Replace with your logo URL or local file path
+st.sidebar.image("logo.png", use_column_width=True)
 st.sidebar.title("Controls")
 category = st.sidebar.radio("Category", ["Currencies", "ETFs", "Rare Materials", "Crypto", "All Assets"])
 period = st.sidebar.selectbox("Period", PERIOD_OPTIONS, index=4)  # Default to "1 Year"
@@ -192,14 +192,15 @@ if category != "All Assets":
         latest_price, diff, pct_change = calculate_metrics(df)
 
         with metrics_cols[i]:
+            st.markdown(f"<h3 class='asset-title'>{asset_name_display}</h3>", unsafe_allow_html=True)
             if latest_price is not None:
                 formatted_price = format_price(latest_price)
-                st.markdown(f"<h3 class='asset-title'>{asset_name_display}</h3>", unsafe_allow_html=True)
                 if diff is not None and pct_change is not None:
                     delta_str = f"{round(diff,2)} ({round(pct_change,2)}%)"
-                    st.metric(label="", value=formatted_price, delta=delta_str)
+                    # Provide a hidden label to prevent empty label warnings
+                    st.metric(label="Latest Price", value=formatted_price, delta=delta_str, label_visibility="collapsed")
                 else:
-                    st.metric(label="", value=formatted_price)
+                    st.metric(label="Latest Price", value=formatted_price, label_visibility="collapsed")
 
                 # Normal plot under the asset
                 normal_fig = create_normal_plot(df, asset_name_display)
@@ -208,7 +209,6 @@ if category != "All Assets":
                 else:
                     st.write("No chart data available.")
             else:
-                st.markdown(f"<h3 class='asset-title'>{asset_name_display}</h3>", unsafe_allow_html=True)
                 st.write("No data for selected period.")
 
     # If multiple assets, show a scaled plot for comparison below all assets
@@ -234,16 +234,16 @@ else:
         for i, asset_table in enumerate(chosen_assets):
             asset_name_display = reverse_lookup.get(asset_table, asset_table)
             with metrics_cols[i]:
+                st.markdown(f"<h3 class='asset-title'>{asset_name_display}</h3>", unsafe_allow_html=True)
                 df = df_dict[asset_name_display]
                 latest_price, diff, pct_change = calculate_metrics(df)
                 if latest_price is not None:
                     formatted_price = format_price(latest_price)
-                    st.markdown(f"<h3 class='asset-title'>{asset_name_display}</h3>", unsafe_allow_html=True)
                     if diff is not None and pct_change is not None:
                         delta_str = f"{round(diff,2)} ({round(pct_change,2)}%)"
-                        st.metric(label="", value=formatted_price, delta=delta_str)
+                        st.metric(label="Latest Price", value=formatted_price, delta=delta_str, label_visibility="collapsed")
                     else:
-                        st.metric(label="", value=formatted_price)
+                        st.metric(label="Latest Price", value=formatted_price, label_visibility="collapsed")
 
                     normal_fig = create_normal_plot(df, asset_name_display)
                     if normal_fig:
@@ -251,7 +251,6 @@ else:
                     else:
                         st.write("No chart data available.")
                 else:
-                    st.markdown(f"<h3 class='asset-title'>{asset_name_display}</h3>", unsafe_allow_html=True)
                     st.write("No data for selected period.")
 
         # Scaled plot for multiple assets
