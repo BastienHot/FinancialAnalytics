@@ -17,7 +17,7 @@ ASSETS_DICT = {
         "Currencies_EUR_USD": "EUR/USD",
         "Currencies_EUR_CNY": "EUR/CNY"
     },
-    "ETFs": {
+    "Index Funds": {  # Renamed from ETFs
         "ETF_SP_500": "S&P 500",
         "ETF_STOXX_600": "Stoxx 600",
         "ETF_CSI_300": "CSI 300"
@@ -32,22 +32,28 @@ ASSETS_DICT = {
     }
 }
 
-# Flatten all tables into a list
+CURRENCY_DICT = {
+    "Currencies_EUR_USD": "$",
+    "Currencies_EUR_CNY": "¥",
+    "ETF_SP_500": "$",
+    "ETF_STOXX_600": "€",
+    "ETF_CSI_300": "¥",
+    "Rare_Materials_Gold": "$",
+    "Rare_Materials_Silver": "$",
+    "Crypto_Bitcoin": "$",
+    "Crypto_Ethereum": "$"
+}
+
 ALL_ASSETS_TABLES = []
 for cat_assets in ASSETS_DICT.values():
     ALL_ASSETS_TABLES.extend(list(cat_assets.keys()))
 
-# Create a reverse lookup: table_name -> display_name
 reverse_lookup = {tbl: name for cat_dict in ASSETS_DICT.values() for tbl, name in cat_dict.items()}
 
-# For "All Assets", we want to show display names instead of table names
 ALL_ASSETS_DISPLAY = [reverse_lookup[tbl] for tbl in ALL_ASSETS_TABLES]
-
-# Create a mapping from display name back to table name for when user selects assets
 display_to_table = {name: tbl for tbl, name in reverse_lookup.items()}
 
 PERIOD_OPTIONS = ["1 Week", "1 Month", "3 Months", "6 Months", "1 Year", "3 Years", "5 Years"]
-
 
 # ---------------------
 # Utility Functions
@@ -86,7 +92,6 @@ def fetch_data_from_db(table_name: str, start_date: str, db_name: str = "histori
         if df.empty:
             return pd.DataFrame()
         df['date'] = pd.to_datetime(df['date'])
-        # Convert price to float
         df['price'] = pd.to_numeric(df['price'], errors='coerce')
         df = df.dropna(subset=['price'])
         return df
@@ -128,36 +133,33 @@ def create_scaled_plot(df_dict: dict):
     fig.update_layout(title="Percentage Change Over Time", xaxis_title="Date", yaxis_title="% Change from Start")
     return fig
 
-def format_price(value: float) -> str:
+def format_price(value: float, currency: str) -> str:
     if value is None:
         return "-"
     abs_val = abs(value)
+    formatted = f"{value:,.2f}"
     if abs_val >= 1_000_000:
-        return f"{value/1_000_000:.1f}M"
+        formatted = f"{value / 1_000_000:.1f}M"
     elif abs_val >= 1_000:
-        return f"{value/1_000:.1f}K"
-    else:
-        return f"{value:.2f}"
+        formatted = f"{value / 1_000:.1f}K"
+    return f"{formatted} {currency}"
 
 # ---------------------
 # UI: Sidebar
 # ---------------------
 st.sidebar.image("logo.png", use_container_width=True)
 st.sidebar.title("Controls")
-category = st.sidebar.radio("Category", ["Currencies", "ETFs", "Rare Materials", "Crypto", "All Assets"])
-period = st.sidebar.selectbox("Period", PERIOD_OPTIONS, index=4)  # Default to "1 Year"
+category = st.sidebar.radio("Category", ["Currencies", "Index Funds", "Rare Materials", "Crypto", "All Assets"])
+period = st.sidebar.selectbox("Period", PERIOD_OPTIONS, index=4)
 start_date_dt = get_period_delta(period)
 start_date = start_date_dt.strftime("%Y-%m-%d")
 
 if category == "All Assets":
-    # Show display names in the multiselect
-    # Default selection: "S&P 500" and "Gold"
     chosen_display_assets = st.sidebar.multiselect(
         "Select Assets to Compare",
         ALL_ASSETS_DISPLAY,
         default=["S&P 500", "Gold"]
     )
-    # Convert chosen display names back to table names
     chosen_assets = [display_to_table[name] for name in chosen_display_assets]
 else:
     chosen_assets = list(ASSETS_DICT[category].keys())
@@ -165,19 +167,17 @@ else:
 # ---------------------
 # Main Content
 # ---------------------
-
-# Add custom CSS for larger asset titles
-st.markdown("""
-<style>
-h3.asset-title {
-    font-size: 1.5em !important;
-    font-weight: bold;
-    margin-bottom: 0.2em;
-}
-</style>
-""", unsafe_allow_html=True)
-
 st.title("Financial Assets Analysis")
+
+if category == "Index Funds":
+    st.markdown(
+        """
+        **Disclaimer:** The displayed values are approximate and based on ETFs tracking the indices:
+        - **S&P 500**: SPY
+        - **Stoxx 600**: EXSA.DE
+        - **CSI 300**: ASHR
+        """
+    )
 
 if category != "All Assets":
     st.header(f"{category} Overview")
@@ -187,6 +187,7 @@ if category != "All Assets":
 
     for i, asset_table in enumerate(chosen_assets):
         asset_name_display = reverse_lookup[asset_table]
+        currency_symbol = CURRENCY_DICT[asset_table]
         df = fetch_data_from_db(asset_table, start_date)
         df_dict[asset_name_display] = df
         latest_price, diff, pct_change = calculate_metrics(df)
@@ -194,15 +195,13 @@ if category != "All Assets":
         with metrics_cols[i]:
             st.markdown(f"<h3 class='asset-title'>{asset_name_display}</h3>", unsafe_allow_html=True)
             if latest_price is not None:
-                formatted_price = format_price(latest_price)
+                formatted_price = format_price(latest_price, currency_symbol)
                 if diff is not None and pct_change is not None:
                     delta_str = f"{round(diff,2)} ({round(pct_change,2)}%)"
-                    # Provide a hidden label to prevent empty label warnings
-                    st.metric(label="Latest Price", value=formatted_price, delta=delta_str, label_visibility="collapsed")
+                    st.metric(label=f"Latest Price ({currency_symbol})", value=formatted_price, delta=delta_str, label_visibility="collapsed")
                 else:
-                    st.metric(label="Latest Price", value=formatted_price, label_visibility="collapsed")
+                    st.metric(label=f"Latest Price ({currency_symbol})", value=formatted_price, label_visibility="collapsed")
 
-                # Normal plot under the asset
                 normal_fig = create_normal_plot(df, asset_name_display)
                 if normal_fig:
                     st.plotly_chart(normal_fig, use_container_width=True)
@@ -211,7 +210,6 @@ if category != "All Assets":
             else:
                 st.write("No data for selected period.")
 
-    # If multiple assets, show a scaled plot for comparison below all assets
     if len(chosen_assets) > 1:
         st.subheader("Comparative Analysis (Scaled Plot)")
         scaled_fig = create_scaled_plot(df_dict)
@@ -226,6 +224,7 @@ else:
         df_dict = {}
         for asset_table in chosen_assets:
             asset_name_display = reverse_lookup.get(asset_table, asset_table)
+            currency_symbol = CURRENCY_DICT[asset_table]
             df = fetch_data_from_db(asset_table, start_date)
             df_dict[asset_name_display] = df
 
@@ -238,12 +237,12 @@ else:
                 df = df_dict[asset_name_display]
                 latest_price, diff, pct_change = calculate_metrics(df)
                 if latest_price is not None:
-                    formatted_price = format_price(latest_price)
+                    formatted_price = format_price(latest_price, CURRENCY_DICT[asset_table])
                     if diff is not None and pct_change is not None:
                         delta_str = f"{round(diff,2)} ({round(pct_change,2)}%)"
-                        st.metric(label="Latest Price", value=formatted_price, delta=delta_str, label_visibility="collapsed")
+                        st.metric(label=f"Latest Price ({CURRENCY_DICT[asset_table]})", value=formatted_price, delta=delta_str, label_visibility="collapsed")
                     else:
-                        st.metric(label="Latest Price", value=formatted_price, label_visibility="collapsed")
+                        st.metric(label=f"Latest Price ({CURRENCY_DICT[asset_table]})", value=formatted_price, label_visibility="collapsed")
 
                     normal_fig = create_normal_plot(df, asset_name_display)
                     if normal_fig:
@@ -253,7 +252,6 @@ else:
                 else:
                     st.write("No data for selected period.")
 
-        # Scaled plot for multiple assets
         if len(chosen_assets) > 1:
             st.subheader("Comparative Analysis (Scaled Plot)")
             scaled_fig = create_scaled_plot(df_dict)
