@@ -176,3 +176,10 @@ These visualizations are made with **Plotly**, ensuring interactive tooltips, zo
     ```
     
     **Save** and exit.
+
+8. **Create** `.env` file for the API keys.
+   In the same folder as the `fetch_data.py` script, create a `.env` file like this:
+   ```bash
+   ALPHA_VANTAGE_API_KEY=SOME_API_KEY
+   EXCHANGE_RATE_API_KEY=SOME_OTHER_API_KEY
+   ```
