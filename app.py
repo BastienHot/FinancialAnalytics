@@ -16,9 +16,9 @@ ASSETS_DICT = {
     "Currencies": {
         "Currencies_EUR_USD": "EUR/USD",
         "Currencies_EUR_CNY": "EUR/CNY",
-        "Currencies_USD_CNY": "USD/CNY"  # Added USD/CNY pair
+        "Currencies_USD_CNY": "USD/CNY"
     },
-    "Index Funds": {  # Renamed from ETFs
+    "Index Funds": {
         "ETF_SP_500": "S&P 500",
         "ETF_STOXX_600": "Stoxx 600",
         "ETF_CSI_300": "CSI 300"
@@ -36,7 +36,7 @@ ASSETS_DICT = {
 CURRENCY_DICT = {
     "Currencies_EUR_USD": "$",
     "Currencies_EUR_CNY": "¥",
-    "Currencies_USD_CNY": "¥",  # Added USD/CNY currency symbol
+    "Currencies_USD_CNY": "¥",
     "ETF_SP_500": "$",
     "ETF_STOXX_600": "€",
     "ETF_CSI_300": "¥",
@@ -79,7 +79,7 @@ def get_period_delta(period_str: str) -> datetime:
         return now - timedelta(days=5*365)
     return now - timedelta(days=365)
 
-@st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False, ttl=900)  # Refresh cached data every 15 minutes
 def fetch_data_from_db(table_name: str, start_date: str, db_name: str = "./assets/data/historical_data.db") -> pd.DataFrame:
     try:
         conn = sqlite3.connect(db_name)
@@ -171,16 +171,6 @@ else:
 # ---------------------
 st.title("Financial Assets Analysis")
 
-if category == "Index Funds":
-    st.markdown(
-        """
-        **Disclaimer:** The displayed values are approximate and based on ETFs tracking the indices:
-        - **S&P 500**: SPY
-        - **Stoxx 600**: EXSA.DE
-        - **CSI 300**: ASHR
-        """
-    )
-
 if category != "All Assets":
     st.header(f"{category} Overview")
 
@@ -219,6 +209,16 @@ if category != "All Assets":
             st.plotly_chart(scaled_fig, use_container_width=True)
         else:
             st.write("No comparative data available for the selected period.")
+
+    if category == "Index Funds":
+        st.markdown(
+            """
+            **Disclaimer:** The displayed values are approximate and based on ETFs tracking the indices:
+            - **S&P 500**: SPY
+            - **Stoxx 600**: EXSA.DE
+            - **CSI 300**: ASHR
+            """
+        )
 
 else:
     st.header("Compare Assets Across All Categories")
