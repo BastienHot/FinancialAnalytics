@@ -1,5 +1,4 @@
-.env
+assets/data
+assets/logs
 venv
-old
-logs/
-test.ipynb
+.env

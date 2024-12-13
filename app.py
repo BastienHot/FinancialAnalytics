@@ -15,7 +15,8 @@ st.set_page_config(page_title="Financial Analysis App", layout="wide")
 ASSETS_DICT = {
     "Currencies": {
         "Currencies_EUR_USD": "EUR/USD",
-        "Currencies_EUR_CNY": "EUR/CNY"
+        "Currencies_EUR_CNY": "EUR/CNY",
+        "Currencies_USD_CNY": "USD/CNY"  # Added USD/CNY pair
     },
     "Index Funds": {  # Renamed from ETFs
         "ETF_SP_500": "S&P 500",
@@ -35,6 +36,7 @@ ASSETS_DICT = {
 CURRENCY_DICT = {
     "Currencies_EUR_USD": "$",
     "Currencies_EUR_CNY": "¥",
+    "Currencies_USD_CNY": "¥",  # Added USD/CNY currency symbol
     "ETF_SP_500": "$",
     "ETF_STOXX_600": "€",
     "ETF_CSI_300": "¥",
@@ -78,7 +80,7 @@ def get_period_delta(period_str: str) -> datetime:
     return now - timedelta(days=365)
 
 @st.cache_data(show_spinner=False)
-def fetch_data_from_db(table_name: str, start_date: str, db_name: str = "historical_data.db") -> pd.DataFrame:
+def fetch_data_from_db(table_name: str, start_date: str, db_name: str = "./assets/data/historical_data.db") -> pd.DataFrame:
     try:
         conn = sqlite3.connect(db_name)
         query = f"""
@@ -147,7 +149,7 @@ def format_price(value: float, currency: str) -> str:
 # ---------------------
 # UI: Sidebar
 # ---------------------
-st.sidebar.image("logo.png", use_container_width=True)
+st.sidebar.image("./assets/img/logo.png", use_container_width=True)
 st.sidebar.title("Controls")
 category = st.sidebar.radio("Category", ["Currencies", "Index Funds", "Rare Materials", "Crypto", "All Assets"])
 period = st.sidebar.selectbox("Period", PERIOD_OPTIONS, index=4)
