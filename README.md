@@ -169,10 +169,10 @@ These visualizations are made with **Plotly**, ensuring interactive tooltips, zo
     ```bash
     crontab -e
     ```
-    Then add:
+    Then add (with your own path):
 
     ```bash
-    55 23 * * * /path/to/your/script.sh
+    55 23 * * * /home/debian/FinancialAnalytics/fetch_data.py
     ```
     
     **Save** and exit.
