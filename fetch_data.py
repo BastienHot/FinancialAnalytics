@@ -1,3 +1,5 @@
+#!/home/debian/FinancialAnalytics/venv/bin/python
+
 import os
 import sqlite3
 import requests

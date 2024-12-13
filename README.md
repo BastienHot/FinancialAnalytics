@@ -141,9 +141,29 @@ These visualizations are made with **Plotly**, ensuring interactive tooltips, zo
    ```bash
    git clone https://github.com/BastienHot/FinancialAnalytics.git
    cd FinancialAnalytics
-2. **Install** the **dependencies**
-3. **Create SQLite database** respecting the details above and **import the data**.
-3. **Create** a **Cron Job** for **data fetching**:
+2. **Create** a **Virtual Environment**:
+   Create the Environment:
+   ```bash
+   python -m venv venv
+   ```
+   Enter the Environment:
+   ```bash
+   source ./venv/bin/activate
+   ```
+3. **Install** the **dependencies**
+4. **Create SQLite database** respecting the details above and **import the data**.
+5. Ensure the Python script has **execution rights**:
+   ```bash
+   chmod +x fetch_data.py
+   ```
+6. **Change Shebang** in `fetch_data.py`:
+   Replace with the actual path on your system:
+   ```bash
+   #!/home/debian/FinancialAnalytics/venv/bin/python
+   ```
+
+   (On this example we run a debian server with a user called debian.)
+7. **Create** a **Cron Job** for **data fetching**:
     
     Enter the Crontab file:
     ```bash
