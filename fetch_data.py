@@ -91,8 +91,7 @@ def fetch_exchange_rates(api_key):
     return exchange_rates
 
 def store_data(table_name, date, price):
-    os.path.join(script_dir, 'assets/logs')
-    conn = sqlite3.connect(DATA_DIR+"/historical_data.db")
+    conn = sqlite3.connect(f"{DATA_DIR}/historical_data.db")
     cursor = conn.cursor()
 
     cursor.execute(
@@ -110,7 +109,7 @@ def store_data(table_name, date, price):
 
 def cleanup_old_data(table_name, years=5):
     cutoff_date = (datetime.now() - timedelta(days=years*365)).strftime("%Y-%m-%d")
-    conn = sqlite3.connect(DATA_DIR+"/historical_data.db")
+    conn = sqlite3.connect(f"{DATA_DIR}/historical_data.db")
     cursor = conn.cursor()
     cursor.execute(f"DELETE FROM {table_name} WHERE date < ?", (cutoff_date,))
     conn.commit()
