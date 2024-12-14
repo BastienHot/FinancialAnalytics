@@ -1,5 +1,7 @@
 # Financial Assets Comparison Dashboard
 
+**Author:** [Bastien HOTTELET](https://www.hotteletbastien.com) | [LinkedIn](https://www.linkedin.com/in/hottelet-bastien/)
+
 ## Table of Contents
 1. [Project Overview](#project-overview)
 2. [Context & Requirements](#context--requirements)
