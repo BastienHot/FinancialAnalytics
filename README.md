@@ -174,7 +174,7 @@ These visualizations are made with **Plotly**, ensuring interactive tooltips, zo
     Then add (with your own path):
 
     ```bash
-    55 23 * * * /home/debian/FinancialAnalytics/fetch_data.py
+    55 22 * * * /home/debian/FinancialAnalytics/fetch_data.py
     ```
     
     **Save** and exit.
