@@ -60,7 +60,7 @@ All these assets can be compared inside the dashboard view in their respective c
 ## Data Ingestion & Processing Workflow
 
 1. **Data Retrieval & Processing (Cron Job + Python Script):**
-   - Every day at 11:55pm, a python script queries external APIs to fetch updated financial asset prices.
+   - Every day at 6:00am, a python script queries external APIs to fetch updated financial asset prices.
    - The script pre-process this data to extract only the information we want and apply standardization so all of our sources can have the same format. 
    - It then stores the data into a SQLite database (`assets/data/historical_data.db`) and clean the data that is more than 5 years old.
 
@@ -174,7 +174,7 @@ These visualizations are made with **Plotly**, ensuring interactive tooltips, zo
     Then add (with your own path):
 
     ```bash
-    55 22 * * * /home/debian/FinancialAnalytics/fetch_data.py
+    00 05 * * * /home/debian/FinancialAnalytics/fetch_data.py
     ```
     
     **Save** and exit.
